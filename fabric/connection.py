@@ -221,6 +221,9 @@ class Connection(Context):
         connect_timeout=None,
         connect_kwargs=None,
         inline_ssh_env=None,
+        # TODO: worth adding auth_strategy_class here too or nah? easy to add
+        # later and presumably most folks (eg dayjob) will want to just
+        # configure it in a user/proj/systemwide fabric.py
     ):
         """
         Set up a new object representing a server connection.
@@ -482,6 +485,8 @@ class Connection(Context):
         config_kwargs = self.config.connect_kwargs
         constructor_keys = constructor_kwargs.get("key_filename", [])
         config_keys = config_kwargs.get("key_filename", [])
+        # TODO: how does this play with an AuthStrategy that is now doing some
+        # or all of the ssh_config loading for auth params?
         ssh_config_keys = self.ssh_config.get("identityfile", [])
 
         # Default data: constructor if given, config otherwise
@@ -604,10 +609,20 @@ class Connection(Context):
         `SSHClient.connect <paramiko.client.SSHClient.connect>`. (For details,
         see :doc:`the configuration docs </concepts/configuration>`.)
 
+        :returns:
+            The result of the internal call to `.SSHClient.connect`, if
+            performing an initial connection; ``None`` otherwise.
+
         .. versionadded:: 2.0
+        .. versionchanged:: 3.1
+            Now returns the inner Paramiko connect call's return value instead
+            of always returning the implicit ``None``.
         """
         # Short-circuit
         if self.is_connected:
+            # TODO: or do we want to memoize the original return value and just
+            # always return that instead? though then we have two "did you
+            # already connect" signals...
             return
         err = "Refusing to be ambiguous: connect() kwarg '{}' was given both via regular arg and via connect_kwargs!"  # noqa
         # These may not be given, period
@@ -638,9 +653,34 @@ class Connection(Context):
         # Strip out empty defaults for less noisy debugging
         if "key_filename" in kwargs and not kwargs["key_filename"]:
             del kwargs["key_filename"]
+        auth_strategy_class = self.authentication.strategy_class
+        if auth_strategy_class is not None:
+            # Pop connect_kwargs related to auth to avoid giving Paramiko
+            # conflicting signals.
+            for key in (
+                "allow_agent",
+                "key_filename",
+                "look_for_keys",
+                "passphrase",
+                "password",
+                "pkey",
+                "username",
+                # TODO: gss
+            ):
+                kwargs.pop(key, None)
+
+            # TODO: we need to give it the username if it was supplied via
+            # Python instead of ssh_config, right? but it's optional? at what
+            # point in legacy flow did something do the "get_system_user if
+            # nothing was given or configured" check? or was that broken?
+            kwargs["auth_strategy"] = auth_strategy_class(
+                username=self.user, ssh_config=self.ssh_config
+            )
         # Actually connect!
-        self.client.connect(**kwargs)
+        result = self.client.connect(**kwargs)
         self.transport = self.client.get_transport()
+        # TODO: test this lol
+        return result
 
     def open_gateway(self):
         """

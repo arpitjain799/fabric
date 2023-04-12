@@ -63,7 +63,8 @@ setuptools.setup(
         "Twitter": "https://twitter.com/pyfabric",
     },
     python_requres=">=3.6",
-    install_requires=["invoke>=2.0", "paramiko>=2.4"],
+    # TODO: did invoke actually change any APIs I want to care about?
+    install_requires=["invoke>=2.0", "paramiko>=3.2"],
     extras_require={
         # For folks who want to use fabric.testing package, eg
         # MockRemote/MockSFTP

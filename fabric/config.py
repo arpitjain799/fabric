@@ -287,6 +287,10 @@ class Config(InvokeConfig):
         defaults, see our own config docs at :ref:`default-values`.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 3.1
+            Added the ``authentication`` settings section, plus sub-attributes
+            such as ``authentication.strategy_class``.
         """
         # TODO: hrm should the run-related things actually be derived from the
         # runner_class? E.g. Local defines local stuff, Remote defines remote
@@ -304,11 +308,19 @@ class Config(InvokeConfig):
         # subtree because otherwise it's guessing where, or whether, 'ssh' is
         # in the setting name!
         ours = {
-            # New settings
+            "authentication": {
+                # TODO: document
+                # TODO: hm how should this and runners type shit work for
+                # yml/toml/json configs? dare I get into that 'interpret a
+                # string as an import' crap?
+                "strategy_class": None,
+            },
             "connect_kwargs": {},
             "forward_agent": False,
             "gateway": None,
             "inline_ssh_env": True,
+            # TODO: make sure how this interplays with new auth is well
+            # understood/documented
             "load_ssh_configs": True,
             "port": 22,
             "runners": {"remote": Remote, "remote_shell": RemoteShell},

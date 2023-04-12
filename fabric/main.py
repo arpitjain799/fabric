@@ -156,15 +156,19 @@ class Fab(Program):
     def parse_core(self, *args, **kwargs):
         super().parse_core(*args, **kwargs)
         if self.args["list-agent-keys"].value:
-            for key in Agent().get_keys():
-                real = key.inner_key
+            keys = Agent().get_keys()
+            for key in keys:
                 tpl = "{} {} {} ({})"
-                print(tpl.format(
-                    key.get_bits(),
-                    key.fingerprint,
-                    key.comment,
-                    key.algorithm_name,
-                ))
+                # TODO: _could_ use new PKey.__repr__ but I like the mimicry of
+                # OpenSSH ssh-add -l for now...
+                print(
+                    tpl.format(
+                        key.get_bits(),
+                        key.fingerprint,
+                        key.comment,
+                        key.algorithm_name,
+                    )
+                )
             raise Exit
 
 

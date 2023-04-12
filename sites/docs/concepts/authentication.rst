@@ -16,6 +16,16 @@ available methods for setting authentication secrets.
     </concepts/configuration>` subtree, or the ``connect_kwargs`` keyword
     argument of `.Connection`.
 
+TODO: how best to work in new auth flow? Its own section, or alongside all the
+below sections? Former seems better?
+TODO: at the _very least_ needs documenting that the new auth flow disregards
+all auth-related connect_kwargs, and the rationale for doing so (tl;dr it was
+already too difficult to tell where exactly some values came from, and the
+intent is to deprecate connect_kwargs and SSHClient eventually anyhow. Plus new
+code means a fresh start is possible!).
+TODO: and that OpenSSHAuthStrategy exists and should probably be used or
+subclassed unless you have very special needs.
+
 Private key files
 =================
 
