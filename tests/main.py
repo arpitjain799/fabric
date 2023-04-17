@@ -9,6 +9,7 @@ import re
 from invoke import run
 from invoke.util import cd
 from unittest.mock import patch
+from paramiko.agent import AgentKey
 import pytest  # because WHY would you expose @skip normally? -_-
 from pytest_relaxed import raises
 

@@ -13,6 +13,12 @@ Changelog
     names in this paragraph to visit their changelogs and see what you might get
     if you upgrade your dependencies.
 
+
+- :feature:`-` Add a new CLI flag to ``fab``, ``fab --list-agent-keys``, which
+  will attempt to connect to your local SSH agent and print a key list,
+  similarly to ``ssh-add -l``. This is mostly useful for expectations-checking
+  Fabric and Paramiko's agent functionality, or for situations where you might
+  not have ``ssh-add`` handy.
 - :release:`3.0.0 <2023-01-20>`
 - :bug:`1981 major` (fixed in :issue:`2195`) Automatically close any open SFTP
   session during `fabric.connection.Connection.close`; this avoids issues
